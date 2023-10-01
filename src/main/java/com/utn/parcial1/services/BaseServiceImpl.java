@@ -3,70 +3,87 @@ package com.utn.parcial1.services;
 import com.utn.parcial1.entities.Base;
 import com.utn.parcial1.repositories.BaseRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class BaseServiceImpl<E extends Base, Id extends Serializable> implements BaseService<E, Id> {
-    protected BaseRepository<E,Id> baseRepository;
+public abstract class BaseServiceImpl<E extends Base, ID extends Serializable> implements BaseService<E, ID> {
+    protected BaseRepository<E, ID> baseRepository;
 
-
-    public BaseServiceImpl(BaseRepository<E, Id> baseRepository) {
+    public BaseServiceImpl(BaseRepository<E, ID> baseRepository) {
         this.baseRepository = baseRepository;
+    }
+
+    @Override
+    @Transactional
+    public List<E> findAll() throws Exception {
+        try {
+            List<E> entities = baseRepository.findAll();
+            return entities;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
     @Override
     @Transactional
-    public List<E> findAll() throws Exception{
-        try{
-            List<E> entities = baseRepository.findAll();
+    public Page<E> findAll(Pageable pageable) throws Exception {
+        try {
+            Page<E> entities = baseRepository.findAll(pageable);
             return entities;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public E findById(Id id) throws Exception {
-        try{
-            Optional<E> entityOptional = baseRepository.findById(id);
-            return entityOptional.get();
-        }catch (Exception e){
+    @Transactional
+    public E findById(ID id) throws Exception {
+        try {
+            Optional<E> optionalEntity = baseRepository.findById(id);
+            return optionalEntity.get();
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
+    @Transactional
     public E save(E entity) throws Exception {
-        try{
+        try {
             entity = baseRepository.save(entity);
             return entity;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public E update(Id id, E entity) throws Exception {
-        try{
-            Optional<E> entityOptional = baseRepository.findById(id);
-            E persona = entityOptional.get();
-            return baseRepository.save(persona);
-        }catch (Exception e){
+    @Transactional
+    public E update(ID id, E entity) throws Exception {
+        try {
+            Optional<E> optionalEntity = baseRepository.findById(id);
+            E persona = optionalEntity.get();
+            persona = baseRepository.save(entity);
+            return persona;
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public boolean delete(Id id) throws Exception {
-        try{
-            if(baseRepository.existsById(id)){
+    @Transactional
+    public boolean delete(ID id) throws Exception {
+        try {
+            if (baseRepository.existsById(id)) {
                 baseRepository.deleteById(id);
                 return true;
-            }else{
+            } else {
                 throw new Exception();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
